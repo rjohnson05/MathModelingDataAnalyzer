@@ -80,28 +80,32 @@ def prepare_data(df):
     inst_ids = {}
 
     institutions_df = pd.DataFrame()
-    teams_df = pd.DataFrame()
+    teams_df = pd.DataFrame(columns=["Team Number", "Advisor", "Problem", "Ranking", "Institution ID"])
     for index, row in df.iterrows():
-        # Add institution data from the row
-        if row["Institution"] not in inst_ids.keys():
+        # Add institution data from the row, cleaning the data before entering it into the new spreadsheet
+        institution = row["Institution"]
+        cleaned_institution = institution.split(",")[0].strip()
+        lowercase_institution = cleaned_institution.lower()
+        if lowercase_institution not in inst_ids.keys():
             inst_id_counter += 1
-            inst_ids[row["Institution"]] = inst_id_counter
-        row_institution = pd.DataFrame({'Institution ID': [inst_ids[row["Institution"]]],
-                                        'Institution Name': [row['Institution']],
-                                        'City': [row['City']],
-                                        'State/Province': [row['State/Province']],
-                                        'Country': [row['Country']]})
-        institutions_df = pd.concat([institutions_df, row_institution], ignore_index=True)
-        institutions_df = institutions_df.reset_index(drop=True)
+            inst_ids[lowercase_institution] = inst_id_counter
+            row_institution = pd.DataFrame({'Institution ID': [inst_ids[lowercase_institution]],
+                                            'Institution Name': [lowercase_institution.title()],
+                                            'City': [row['City'].lower().title()],
+                                            'State/Province': [row['State/Province'].lower().title() if type(row['State/Province']) is str else None],
+                                            'Country': [row['Country'].lower().title() if type(row['Country']) is str else None]})
+            institutions_df = pd.concat([institutions_df, row_institution], ignore_index=True)
+            institutions_df = institutions_df.reset_index(drop=True)
 
-        # Add team data from the row
-        row_team = pd.DataFrame({'Team Number': [row['Team Number']],
-                                 'Advisor': [row['Advisor']],
-                                 'Problem': [row['Problem']],
-                                 'Ranking': [row['Ranking']],
-                                 'Institution ID': [inst_ids[row["Institution"]]]})
-        teams_df = pd.concat([teams_df, row_team], ignore_index=True)
-        teams_df = teams_df.reset_index(drop=True)
+        # Add team data from the row if the team isn't already present
+        if not teams_df['Team Number'].isin([row['Team Number']]).any():
+            row_team = pd.DataFrame({'Team Number': [row['Team Number']],
+                                     'Advisor': [row['Advisor'].lower().title()],
+                                     'Problem': [row['Problem'].capitalize() if type(row['Problem']) == str else None],
+                                     'Ranking': [row['Ranking'].lower().title()],
+                                     'Institution ID': [inst_ids[lowercase_institution]]})
+            teams_df = pd.concat([teams_df, row_team], ignore_index=True)
+            teams_df = teams_df.reset_index(drop=True)
 
     # Generate institution and team .csv files using these created dataframes
     institutions_df.to_csv('Institutions.csv', index=False)
