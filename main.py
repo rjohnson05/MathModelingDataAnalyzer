@@ -2,9 +2,10 @@ import sqlite3
 import pandas as pd
 
 """
-Allows a user to provide a .csv file containing data about the Math Modeling Contest. This file must have the correct 
-format before creating two new spreadsheets: one containing only data about the institutions and the other providing 
-information about the participating teams.
+Allows a user to provide a .csv file containing data about the Math Modeling Contest and view the answers to several
+analytical questions, creating a SQLite database to do so. The provided .csv file must have the correct format before 
+creating two new spreadsheets: one containing only data about the institutions and the other providing information about 
+the participating teams.
 
 Author: Ryan Johnson
 """
@@ -38,7 +39,7 @@ def get_input_dataframe():
 
 def validate_dataframe(df):
     """
-    Checks whether a dataframe has the necessary columns for splitting it into an Institutions and Teams spreadsheet.
+    Checks whether a dataframe has the necessary columns for splitting it into an Institutions and Teams dataframe.
 
     :param df: Pandas dataframe to be checked
     :return: True if the dataframe has the necessary columns; False otherwise
